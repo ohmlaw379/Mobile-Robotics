@@ -3,7 +3,7 @@ int motor1PWM = 37;
 int motor1Phase = 38;
 int motor2PWM = 39;
 int motor2Phase = 20;
-int VoltagePWM = analogRead(DistancePin);
+
 
 void setup() { 
   Serial.begin(9600); 
