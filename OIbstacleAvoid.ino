@@ -13,7 +13,7 @@ void loop() {
   int VoltagePWM = analogRead(DistancePin);
   Serial.println(VoltagePWM);
 
-  while(VoltagePWM <1500){
+  while(VoltagePWM < 4000){
     analogWrite(motor1Phase, 255); //forward left motor
     analogWrite(motor1PWM, 200); // set speed of left motor
     analogWrite(motor2Phase, 255); //forward right moto
@@ -22,11 +22,12 @@ void loop() {
   
   stop();
   delay(1000);
+  /*
   analogWrite(motor1Phase, 255); //forward left motor
   analogWrite(motor1PWM, 200); // set speed of left motor
   analogWrite(motor2Phase, 0); //forward right moto
   analogWrite(motor2PWM, 200); // set speed of right motor
-  
+  */
 
   }
 }
