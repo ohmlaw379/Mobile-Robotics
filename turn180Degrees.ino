@@ -20,7 +20,7 @@ void loop() {
   analogWrite(motor1PWM, 200); // set speed of left motor
   analogWrite(motor2Phase, 0); //reverse right motor
   analogWrite(motor2PWM, 200); // set speed of right motor
-  delay(500);
+  delay(700);
   stop();
 }
 
