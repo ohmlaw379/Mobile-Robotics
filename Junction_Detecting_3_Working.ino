@@ -23,7 +23,7 @@ int turn[5][4] = {
   {255, 230, 255, 37} //outer left
 };//
 int AnalogValue[5] = {0,0,0,0,0};
-int AnalogPin[5] = {4,5,6,7,15}; // keep 8 free for tone O/P music
+int AnalogPin[5] = {10,11,12,13,14}; // keep 8 free for tone O/P music
 
 
 void drive(int current_direction_m1, int current_speed_m1, int current_direction_m2, int current_speed_m2, int direction_m1, int speed_m1, int direction_m2, int speed_m2, int time);
@@ -37,6 +37,11 @@ void setup()
  analogWrite(motor1PWM, 0); // set speed of left motor
  analogWrite(motor2Phase, 0); //forward right moto
  analogWrite(motor2PWM, 0); // set speed of right motor
+ pinMode(10,INPUT);
+ pinMode(11,INPUT);
+ pinMode(12,INPUT);
+ pinMode(13,INPUT);
+ pinMode(14,INPUT);
 }
 
 void loop()
@@ -54,7 +59,7 @@ void loop()
   if(i==4)
     {
     Serial.println(""); //carriage return
-    //delay(120); // display new set of readings every 600mS
+    ////delay(120); // display new set of readings every 600mS
 
     junction_count();
 
@@ -129,6 +134,9 @@ void stop(){
 void junction_count(){
   if (AnalogValue[3]<900 && AnalogValue[2]<900 && AnalogValue[1]<900){ // print junction number
       //condition ? expression_if_true : expression_if_false;
+      stop();
+      delay(500);
+      Serial.println('Case 1');
       count++; 
       if (count == 3){
         stop();
