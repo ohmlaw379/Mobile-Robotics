@@ -69,7 +69,7 @@ int Junctions[] = {0, 1, 3, 2, 1, 4, 0, 3, 4, 1};
 const int INF = 1e9; // Define infinity as a large value
 const int V = 5; // Number of vertices for vector matrix
 
-int distanceSensorPin = 16 // define distance sensor pin
+int distanceSensorPin = 9; // define distance sensor pin
 bool obstacleDetected = false; // bool value for obstacle detection
 int currentNode = 0;
 
@@ -123,7 +123,8 @@ void setup() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
-Serial.println(count);
+  Serial.println(count);
+  
   if (a<10){
     int i;
     for (i=0;i<5;i++)
