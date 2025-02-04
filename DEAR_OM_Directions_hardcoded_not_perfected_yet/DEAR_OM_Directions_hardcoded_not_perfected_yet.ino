@@ -3,6 +3,8 @@
 Will we be given the number of junctions needing to be passed? - shouldnt affect it much since the parking function can have a variable that 
 ends the loop
 */
+
+#include <vector>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Motors 
 int motor1PWM = 37;
@@ -24,6 +26,16 @@ int turn[5][4] = {
   {255, 193, 255, 110}, //inner left
   {255, 255, 255, 15} //outer left
 };//
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Adjacent Matrix for Dijkstra Algorithm
+std::vector<std::vector<int>> adjMatrix = {
+    {0, 4, 6, INF, 2},
+    {4, 0, 2, 5, 5},
+    {6, 4, 0, 2, INF},
+    {INF, 5, 2, 0, 8},
+    {2, 5, INF, 8, 0}
+};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Variables 
 int count = 0;//counts number of junctions passed
@@ -53,6 +65,14 @@ int a = 0; //position in array
 int Junctions[] = {0, 1, 3, 2, 1, 4, 0, 3, 4, 1};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const int INF = 1e9; // Define infinity as a large value
+const int V = 5; // Number of vertices for vector matrix
+
+int distanceSensorPin = 16 // define distance sensor pin
+bool obstacleDetected = false; // bool value for obstacle detection
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Function Declarations
 void drive(int current_direction_m1, int current_speed_m1, int current_direction_m2, int current_speed_m2, int direction_m1, int speed_m1, int direction_m2, int speed_m2, int time);
 void follow_the_line();
@@ -74,7 +94,8 @@ void FiveJunction();
 void turn180_function();
 void turn90_function(int direction_of_turn);
 
-
+std::vector<int> dijkstra(int start, int destination);
+void getPath(std::vector<int> route);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -549,4 +570,57 @@ void junction_1_directions(int mid_direction, int direction, int direction_of_tu
   //driving from edge junctions (5&6) to the next junction
   drive_to_junction(mid_direction, direction, 0, 2, 2);
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Dijkstra Algorithm
+std::vector<int> dijkstra(int start, int destination) {
+    std::vector<int> dist(V, INF);
+    std::vector<int> parent(V, -1);
+    std::vector<bool> visited(V, false);
+    dist[start] = 0;
 
+    for (int count = 0; count < V - 1; count++) {
+        int u = -1;
+        for (int i = 0; i < V; i++) {
+            if (!visited[i] && (u == -1 || dist[i] < dist[u])) {
+                u = i;
+            }
+        }
+
+        if (u == -1 || dist[u] == INF) break;
+
+        visited[u] = true;
+        for (int v = 0; v < V; v++) {
+            if (!visited[v] && adjMatrix[u][v] != INF) {
+                int newDist = dist[u] + adjMatrix[u][v];
+                if (newDist < dist[v]) {
+                    dist[v] = newDist;
+                    parent[v] = u;
+                }
+            }
+        }
+    }
+
+    std::vector<int> path;
+    for (int v = destination; v != -1; v = parent[v]) {
+        path.push_back(v);
+    }
+    reverse(path.begin(), path.end());
+
+    return path;
+}
+
+void getPath(std::vector<int> route){
+  for(int i=0; i<route.size()-1; i++){
+    dijkstra(route[i],route[i+1]);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void getPath(std::vector<int> route){
+  for(int i=0; i<route.size()-1; i++){
+    dijkstra(route[i],route[i+1]);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
