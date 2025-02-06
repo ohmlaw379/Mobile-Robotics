@@ -130,8 +130,7 @@ Serial.println(count);
         delay(3000);
 
   
-    int i;
-    for (i=0;i<5;i++)
+    for (int i=0;i<5;i++)
       {
       AnalogValue[i]=analogRead(AnalogPin[i]);
       Serial.println(AnalogValue[i]);
