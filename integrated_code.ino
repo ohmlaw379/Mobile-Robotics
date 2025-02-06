@@ -125,10 +125,9 @@ void loop() {
 Serial.println(count);
         next = getNextPosition(next);
         if(next!= -2){
-        Junctions.push_back(next);
+          Junctions.push_back(next);
         }
         delay(3000);
-    // Nothing needed here as the main logic is in setup()
 
   
     int i;
