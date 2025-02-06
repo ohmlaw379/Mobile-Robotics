@@ -1,11 +1,9 @@
+
 //Questions and Notes for later
 /* 
 Will we be given the number of junctions needing to be passed? - shouldnt affect it much since the parking function can have a variable that 
 ends the loop
 */
-
-//processing 
-
 #include <WiFi.h> // Use WiFi.h for ESP32
 #include <vector>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +36,6 @@ int turn[5][4] = {
   {255, 193, 255, 110}, //inner left
   {255, 255, 255, 15} //outer left
 };//
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Variables 
 int count = 0;//counts number of junctions passed
@@ -81,6 +78,8 @@ void stop();
 void drive_to_junction(int mid_direction, int direction, int junctions_until_turn, int direction_of_turn, int no_junctions_pass);
 void junction_1_directions(int mid_direction, int direction, int direction_of_turn);
 
+
+
 void ZeroJunction(); //going to zero, coming from..
 void OneJunction();
 void TwoJunction();
@@ -99,6 +98,7 @@ int getNextPosition(int currentPosition);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 void setup() {
   // put your setup code here, to run once:
   
@@ -114,22 +114,22 @@ void setup() {
     pinMode(13,INPUT);
     pinMode(14,INPUT);
 
+    next = getNextPosition(next);
+    if(next!= -2){
+      Junctions.push_back(next);
+    }
+    delay(3000);
     current_junction = Junctions[0];
-
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
 Serial.println(count);
-    Serial.println("Next destination: " + String(next));
-
-    // Nothing needed here as the main logic is in setup()
-
   
-    int i;
-    for (i=0;i<5;i++)
+    for (int i=0;i<5;i++)
       {
       AnalogValue[i]=analogRead(AnalogPin[i]);
       Serial.println(AnalogValue[i]);
@@ -141,7 +141,7 @@ Serial.println(count);
           }
           else{
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-          switch (next)
+          switch (Junctions[a])
               {case 0:
                 ZeroJunction();
                 break;
@@ -275,7 +275,7 @@ String getResponseBody(String& response) {
 int getNextPosition(int currentPosition) {
     if (connectToServer()) {
             // Prepare POST body
-            String postBody = "position=" + String(currentPosition);
+            String postBody = "position=" + String(next);
 
             // Send POST request and headers
             client.println("POST /api/arrived/rthj3564 HTTP/1.1");
@@ -307,8 +307,8 @@ int getNextPosition(int currentPosition) {
                     } else {
                         //position = destination;
                         //int next= destination// Update position for the next iteration
+                        Serial.println("Next destination: " + String(destination));
                         return destination;
-
                     }
                 }
             } else {
@@ -317,14 +317,14 @@ int getNextPosition(int currentPosition) {
             }
 
             client.stop(); // Close the connection before the next iteration
-            delay(20); // Add a small delay to prevent overwhelming the server
+            delay(1000); // Add a small delay to prevent overwhelming the server
         } else {
             Serial.println("Failed to connect to server. Retrying...");
-            delay(20);
+            delay(3000);
             return -2;// Wait before retrying the server connection
         }
         return 100;
-        delay(20);
+        delay(3000);
     // Nothing needed here as the main logic is in setup()
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,7 +368,7 @@ void follow_the_line(){
     // counts every time it passes over a junction
     count++;
     drive(turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], 50);
-    delay(10);
+    //delay(10);
 }
 }
 
@@ -386,10 +386,8 @@ void first_junction(){
   drive(turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], turn[0][0], turn[0][1], turn[0][2], turn[0][3], 50);
   delay(50);
   count = 0; 
-  next = getNextPosition(next);
-  if(next!= -2){
-  Junctions.push_back(next);
-  }  }
+
+  }
 
   else{
     follow_the_line();
@@ -412,24 +410,25 @@ void drive_to_junction(int mid_direction, int directions, int junctions_until_tu
     }
 
     if (count == no_junctions_pass){
-        next = getNextPosition(next);
-        if(next!= -2){
+      //it has reached the next destination 
+      drive(turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], 50);
+      //delay(10);
+      stop();
+      delay(1000);
+      //remembers current junction as refernce for directions
+      next = getNextPosition(next);
+      if(next!= -2){
         Junctions.push_back(next);
-        }
-        //it has reached the next destination 
-        drive(turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], 50);
-        delay(10);
-        //resets junction to zero
-        count = 0; 
-        stop();
-        delay(1000);
-        //refills quota (for number of turns allowed) for the next set of directions
-        quota = 1; 
-        //remembers current junction as refernce for directions
-        current_junction = Junctions[a];
-        //moves on to the next destination in the array
-        a++;
-        }
+      }
+      delay(1000);
+      current_junction = Junctions[a];
+      //moves on to the next destination in the array
+      a++;
+      //resets junction to zero
+      count = 0; 
+      //refills quota (for number of turns allowed) for the next set of directions
+      quota = 1; 
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -517,7 +516,7 @@ void ZeroJunction(){
         break;
         
       case 4:
-          drive_to_junction(0, 0, 0, 1, 1);   ////////////
+          drive_to_junction(0, 0, 0, 1, 1);   
 
         break;
     
@@ -553,9 +552,7 @@ void OneJunction(){
       case 4:
         drive_to_junction(1, 1, 1, 1, 2);
         break;
-    
  } 
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
