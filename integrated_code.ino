@@ -1,3 +1,4 @@
+
 //Questions and Notes for later
 /* 
 Will we be given the number of junctions needing to be passed? - shouldnt affect it much since the parking function can have a variable that 
@@ -65,7 +66,7 @@ int next =0;
 std::vector<int> Junctions = {0};
 //int Junctions[] = {0, 2, 4, 3, 2,0,3};
 //int Junctions[] = {0, 2, 4, 0, 3, 4, 1};
-int size = sizeof(Junctions) / sizeof(Junctions[0]);
+int size = Junctions.size()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Function Declarations
@@ -115,7 +116,6 @@ void setup() {
 
     current_junction = Junctions[0];
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
