@@ -62,7 +62,7 @@ int distanceSensorPin = 9; // define distance sensor pin
 int threshold = 2500;
 bool obstacleDetected = false; // bool value for obstacle detection
 int currentNode = 0;
-int desiredDestination;
+int desired_destination =0;
 int ObstacleCount = 0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +73,7 @@ int next = 0;
 //int Junctions[] = {0,2,3,2};
 std::vector<int> Junctions = {0};
 std::vector<int> reroute;
+std::vector<int> route;
 //int Junctions[] = {0, 2, 4, 3, 2,0,3};
 //int Junctions[] = {0, 2, 4, 0, 3, 4, 1};
 int size = Junctions.size();
@@ -106,6 +107,14 @@ void TwoJunction();
 void ThreeJunction();
 void FourJunction();
 void FiveJunction();
+
+void Junction0();
+void Junction1();
+void Junction2();
+void Junction3();
+void Junction4();
+void Junction5();
+
 
 void turn180_function();
 void turn90_function(int direction_of_turn);
@@ -153,6 +162,7 @@ void loop() {
     obstacleDetected = true;
   while(obstacleDetected){
     ObstacleDetectionProcedure();
+    /*
     for (int j=0;j<5;j++){
       AnalogValue[j]=analogRead(AnalogPin[j]);
       if(j==4){
@@ -186,16 +196,13 @@ void loop() {
               stop();
               break;
             }
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             follow_the_line();
         }
-    	}
+    	}*/
   }
   for (int i=0;i<5;i++)
     {
     AnalogValue[i]=analogRead(AnalogPin[i]);
-    //Serial.println(AnalogValue[i]);
-
     if(i==4)
       {
         if(start<1){
@@ -203,8 +210,7 @@ void loop() {
           follow_the_line();   
         }
         else{
-          ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        switch (Junctions[a])
+        switch (route[a])
             {case 0:
               ZeroJunction();
               break;
@@ -234,7 +240,6 @@ void loop() {
               stop();
               break;
             }
- 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             follow_the_line();
           
@@ -258,21 +263,54 @@ void loop() {
 void ObstacleDetectionProcedure(){
   ++ObstacleCount;
   stop();
+  delay(1500);
+  turn180_function();
+  PreviousJunction();
   adjMatrix[current_junction][Junctions[a]] = INF;
   adjMatrix[Junctions[a]][current_junction] = INF;
-  reroute = dijkstra(current_junction,Junctions[a]);
-  for (int k: reroute){
+  route = dijkstra(current_junction,Junctions[a]);
+  for (int k: route){
     Serial.print(k);
     Serial.print(" ");  
   }
-  //PreviousJunction();
-  Junctions.pop_back();
-  delay(1500);
-  turn180_function();
+  //Junctions.pop_back();
   obstacleDetected = false;
-  follow_the_line();
+  //delay(5);
+  //follow_the_line();
 }
 
+void PreviousJunction(){
+  switch (route[a+1]){
+    case 0:
+      Junction0();
+      break;
+    
+    case 1:
+      Junction1();
+      break;
+      
+    case 2:
+      Junction2();
+      break;
+      
+    case 3:
+      Junction3();
+      break;
+      
+    case 4:
+      Junction4();
+      break;
+      
+    case 5:
+      Junction5();
+      break;
+
+    default:
+      Serial.println("Error: Undefined Junction!");
+      stop();
+      break;
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void drive(int current_direction_m1, int current_speed_m1, int current_direction_m2, int current_speed_m2, int direction_m1, int speed_m1, int direction_m2, int speed_m2){
@@ -453,14 +491,6 @@ void follow_the_line(){
   }
 }
 
-/*
-void PreviousJunction(){
-  follow_the_line();
-  if (total < 6700){ 
-    stop();
-  }
-}
-*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //void drive_to_junction(int mid_direction, int direction, int junctions_until_turn, int direction_of_turn, int no_junctions_pass){
@@ -477,7 +507,7 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
     if (quota == 1 && count == junctions_until_turn && junctions_until_turn == 1){
           turn90_function(direction_of_turn);
     }
-
+    /*
     while (count == no_junctions_pass && ObstacleCount != 0){
       start = 1;
       delay(5);
@@ -493,23 +523,25 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
       quota = 1;
       drive(turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3]);
       delay(10);
-  }
+  }*/
 
-    if (count == no_junctions_pass && ObstacleCount == 0){
+    if (count == no_junctions_pass){
       //it has reached the next destination 
       start = 1; 
       delay(5);
       stop();
       delay(500);
-      //remembers current junction as refernce for directions
-      next = getNextPosition(next);
-      if(next!= -2){
-        Junctions.push_back(next);
+      if(current_junction == desired_destination){
+        next = getNextPosition(next);
+        if(next!= -2)
+          Junctions.push_back(next);
+        route = dijkstra(current_junction, next);
+        a = 0;
       }
-      current_junction = Junctions[a];
-      //moves on to the next destination in the array
+      current_junction = route[a];
+      desired_destination = next;
       a++;
-      //resets junction to zero
+
       count = 0; 
       //refills quota (for number of turns allowed) for the next set of directions
       quota = 1; 
@@ -591,12 +623,7 @@ void ZeroJunction(){
         drive_to_junction(0, 1, 0, 1, 2);
 
         break;
-        
-      case 3:
-        drive_to_junction(0, 0, 0, 1, 3);
 
-        break;
-        
       case 4:
           drive_to_junction(0, 0, 0, 1, 1);   
 
@@ -659,11 +686,6 @@ void TwoJunction(){
         drive_to_junction(0, 1, 0, 2, 1);
 
         break;
-        
-      case 4:
-        drive_to_junction(0, 0, 0, 1, 3);
-        break;
-    
  } 
 
 }
@@ -675,19 +697,12 @@ void TwoJunction(){
 void ThreeJunction(){
   Serial.println("J: 3");
   switch (current_junction){
-      //coming from junction zero
-      case 0:
-        drive_to_junction(0, 0, 0, 1, 3);
-        break;
-      
       case 1:
         junction_1_directions(0, 1, 1, 1, 2);
-
         break;
         
       case 2:
         drive_to_junction(0, 0, 0, 1, 1);
-
         break;
         
       case 3:
@@ -695,7 +710,6 @@ void ThreeJunction(){
         
       case 4:
         drive_to_junction(1, 1, 0, 0, 2);
-
         break;
     
  } 
@@ -716,22 +730,14 @@ void FourJunction(){
       case 1:
         junction_1_directions(0, 0, 1, 0, 2);
         break;
-        
-      case 2:
-        drive_to_junction(0, 1, 0, 0, 3);
 
-        break;
-        
       case 3:
           drive_to_junction(0, 0, 0, 1, 2);
-
         break;
         
       case 4:
-        break;
-    
+        break;    
  } 
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -758,8 +764,9 @@ void FiveJunction(){
         break;
     
  } 
-
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Function for leaving junction 1 
@@ -796,6 +803,232 @@ void junction_1_directions(int mid_direction, int direction, int junctions_until
       quota = 1; 
     }
 }
+
+
+void Junction0(){
+  switch(current_junction){
+    case 0:
+    break;
+    case 1:
+    if(count==1){
+    junction_1_directions(1,1,1,1,2);
+    break;
+    }
+    else{
+      drive_to_junction(0,0,0,0,1);
+      break;
+    }
+
+    case 2:
+    if(count==1){
+    drive_to_junction(0,1,0,1,2);
+    }
+    else{
+      drive_to_junction(0,1,0,1,1);
+    }
+
+    case 3:
+    break;
+
+    case 4:
+    drive_to_junction(0,0,0,1,1);
+    break;
+  }
+}
+void Junction1(){
+  Serial.println("J: 1");
+  switch (current_junction){
+      //coming from junction zero
+      case 0:
+        if(count==1){
+        drive_to_junction(0,0,1,0,2);
+        }
+        else{
+        drive_to_junction(0, 0, 1,0, 1);
+        }
+        break;
+      
+      case 1:
+        break;
+        
+      case 2:
+      if(count==1){
+        drive_to_junction(0, 1, 1,1, 2);
+        }
+       else{
+        drive_to_junction(0, 1, 1, 1, 1);
+       }
+
+        break;
+        
+      case 3:
+      if(count==1){
+        drive_to_junction(1, 0, 1,0, 2);
+      }
+        else{
+        drive_to_junction(1, 0, 1, 0, 1);
+        }
+        break;
+        
+      case 4:
+      if(count==1){
+        drive_to_junction(1, 1, 1,1, 2);
+      }
+      else{
+        drive_to_junction(1, 1, 1, 1, 1);
+      }
+      break;
+ } 
+}
+void Junction2(){
+  switch (current_junction){
+      //coming from junction zero
+      case 0:
+      if(count==1){
+        drive_to_junction(0, 0, 0,0, 2);
+      }
+      else{
+        drive_to_junction(0, 0, 0, 0, 1);
+      }
+        break;
+      
+      case 1:
+      if(count==1){
+        junction_1_directions(1, 0, 1,0, 2);
+      }
+      else{
+        junction_1_directions(1, 0, 1, 0, 1);
+      }
+        break;
+        
+      case 2:
+        break;
+        
+      case 3:
+        drive_to_junction(0, 1, 0, 2, 1);
+
+        break;
+        
+      case 4:
+        //drive_to_junction(0, 0, 0, 1, 3);
+        break;
+    
+ } 
+
+}
+void Junction3(){
+  switch (current_junction){
+      //coming from junction zero
+      case 0:
+
+        //drive_to_junction(0, 0, 0, 1, 3);
+        break;
+      
+      case 1:
+      if(count==1){
+        junction_1_directions(0, 1, 1,1, 2);
+      }
+      else{
+        junction_1_directions(0, 1, 1, 1, 1);
+      }
+        break;
+        
+      case 2:
+        drive_to_junction(0, 0, 0, 1, 1);
+
+        break;
+        
+      case 3:
+        break;
+        
+      case 4:
+      if(count==1){
+        drive_to_junction(1, 1, 0,0, 2);
+      }
+        drive_to_junction(1, 1, 0, 0, 1);
+
+        break;  
+ } 
+}
+void Junction4(){
+  switch (current_junction){
+      //coming from junction zero
+      case 0:
+        drive_to_junction(1, 1, 0, 1, 1);
+        break;
+      
+      case 1:
+      if(count==1){
+        junction_1_directions(0, 0, 1,0, 2);
+      }
+      else{
+        junction_1_directions(0, 0, 1, 0, 1);
+      }
+        break;
+        
+      case 2:
+        //drive_to_junction(0, 1, 0, 0, 3);
+
+        break;
+        
+      case 3:
+      if(count==1){
+        drive_to_junction(0, 0, 0,1, 2);
+      }
+          drive_to_junction(0, 0, 0, 1, 1);
+
+        break;
+        
+      case 4:
+        break;
+  } 
+}
+
+void Junction5(){
+  switch (current_junction){
+//coming from junction zero
+      case 0:
+      if(count==1)
+        drive_to_junction(0, 0, 1, 0, 2);
+
+      else
+        drive_to_junction(0, 0, 1, 0, 1);
+
+        //parking();
+        break;
+      
+      case 1:
+        //parking();
+        break;
+        
+      case 2:
+      if(count==1)
+        drive_to_junction(0, 1, 1, 1, 2);
+      else
+        drive_to_junction(0, 1, 1, 1, 1);
+        //parking();
+        break;
+        
+      case 3:
+      if(count==1)
+        drive_to_junction(1, 0, 1, 0, 2);
+      else
+        drive_to_junction(1, 0, 1, 0, 1);
+      
+        //parking();
+        break;
+        
+      case 4:
+      if(count==1)
+        drive_to_junction(1, 1, 1, 1, 2);
+      else
+       drive_to_junction(1, 1, 1, 1, 1);
+
+        //parking();
+        break;   
+  } 
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Dijkstra's Algorithm - Returns the path 
