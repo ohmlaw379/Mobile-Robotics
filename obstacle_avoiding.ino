@@ -62,7 +62,7 @@ int distanceSensorPin = 9; // define distance sensor pin
 int threshold = 2500;
 bool obstacleDetected = false; // bool value for obstacle detection
 int currentNode = 0;
-int desired_destination =0;
+int desiredDestination =0;
 int ObstacleCount = 0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -72,8 +72,7 @@ int r = 0; // position in reroute
 int next = 0;
 //int Junctions[] = {0,2,3,2};
 std::vector<int> Junctions = {0};
-std::vector<int> reroute;
-std::vector<int> route;
+std::vector<int> route ={0};
 //int Junctions[] = {0, 2, 4, 3, 2,0,3};
 //int Junctions[] = {0, 2, 4, 0, 3, 4, 1};
 int size = Junctions.size();
@@ -84,7 +83,7 @@ const int V = 5; // Number of vertices for vector matrix
 
 std::vector<std::vector<int>> adjMatrix = {
     {0, 4, 6, INF, 2},
-    {4, 0, 2, 5, 5},
+    {4, 0, 4, 5, 5},
     {6, 4, 0, 2, INF},
     {INF, 5, 2, 0, 8},
     {2, 5, INF, 8, 0}
@@ -125,7 +124,7 @@ int getStatusCode(String &response);
 String getResponseBody(String &response);
 int getNextPosition(int currentPosition);
 std::vector<int> dijkstra(int startNode, int destinationNode);
-void ObstacleDetectionProcedure();
+//void ObstacleDetectionProcedure();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -161,7 +160,7 @@ void loop() {
   if (distanceValue > threshold)
     obstacleDetected = true;
   while(obstacleDetected){
-    ObstacleDetectionProcedure();
+    ObstacleDetectionProcedure();}
     /*
     for (int j=0;j<5;j++){
       AnalogValue[j]=analogRead(AnalogPin[j]);
@@ -199,7 +198,7 @@ void loop() {
             follow_the_line();
         }
     	}*/
-  }
+  
   for (int i=0;i<5;i++)
     {
     AnalogValue[i]=analogRead(AnalogPin[i]);
@@ -259,16 +258,17 @@ void loop() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Function Definitions
-
+/*
 void ObstacleDetectionProcedure(){
   ++ObstacleCount;
   stop();
   delay(1500);
   turn180_function();
+  //direction = direction*-1;
   PreviousJunction();
-  adjMatrix[current_junction][Junctions[a]] = INF;
-  adjMatrix[Junctions[a]][current_junction] = INF;
-  route = dijkstra(current_junction,Junctions[a]);
+  adjMatrix[current_junction][route[a]] = INF;
+  adjMatrix[route[a]][current_junction] = INF;
+  route = dijkstra(current_junction, route[a]);
   for (int k: route){
     Serial.print(k);
     Serial.print(" ");  
@@ -280,7 +280,7 @@ void ObstacleDetectionProcedure(){
 }
 
 void PreviousJunction(){
-  switch (route[a+1]){
+  switch (route[a]){
     case 0:
       Junction0();
       break;
@@ -310,7 +310,7 @@ void PreviousJunction(){
       stop();
       break;
     }
-}
+}*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void drive(int current_direction_m1, int current_speed_m1, int current_direction_m2, int current_speed_m2, int direction_m1, int speed_m1, int direction_m2, int speed_m2){
@@ -531,15 +531,16 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
       delay(5);
       stop();
       delay(500);
-      if(current_junction == desired_destination){
+      current_junction = route[a];
+      if(current_junction == desiredDestination){
         next = getNextPosition(next);
         if(next!= -2)
           Junctions.push_back(next);
         route = dijkstra(current_junction, next);
+        desiredDestination = next;
         a = 0;
       }
-      current_junction = route[a];
-      desired_destination = next;
+      
       a++;
 
       count = 0; 
@@ -784,27 +785,33 @@ void junction_1_directions(int mid_direction, int direction, int junctions_until
         turn90_function(direction_of_turn);
     }
     
-  if (count == no_junctions_pass){
+    if (count == no_junctions_pass){
       //it has reached the next destination 
+      start = 1; 
       delay(5);
       stop();
       delay(500);
-      //remembers current junction as refernce for directions
-      next = getNextPosition(next);
-      if(next!= -2){
-        Junctions.push_back(next);
+      current_junction = route[a];
+      if(current_junction == desiredDestination){
+        next = getNextPosition(next);
+        if(next!= -2)
+          Junctions.push_back(next);
+        route = dijkstra(current_junction, next);
+        desiredDestination = next;
+        a = 0;
       }
-      current_junction = Junctions[a];
-      //moves on to the next destination in the array
+      
       a++;
-      //resets junction to zero
+
       count = 0; 
       //refills quota (for number of turns allowed) for the next set of directions
       quota = 1; 
+      drive(turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3], turn[sensors_between_line][0], turn[sensors_between_line][1], turn[sensors_between_line][2], turn[sensors_between_line][3]);
+      delay(10);
     }
 }
 
-
+/*
 void Junction0(){
   switch(current_junction){
     case 0:
@@ -1029,7 +1036,7 @@ void Junction5(){
   } 
 }
 
-
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Dijkstra's Algorithm - Returns the path 
 std::vector<int> dijkstra(int startNode, int destinationNode) {
