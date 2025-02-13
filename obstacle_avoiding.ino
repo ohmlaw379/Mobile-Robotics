@@ -258,7 +258,7 @@ void loop() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Function Definitions
-/*
+
 void ObstacleDetectionProcedure(){
   ++ObstacleCount;
   stop();
@@ -266,6 +266,7 @@ void ObstacleDetectionProcedure(){
   turn180_function();
   //direction = direction*-1;
   PreviousJunction();
+  delay(2000);
   adjMatrix[current_junction][route[a]] = INF;
   adjMatrix[route[a]][current_junction] = INF;
   route = dijkstra(current_junction, route[a]);
@@ -273,14 +274,13 @@ void ObstacleDetectionProcedure(){
     Serial.print(k);
     Serial.print(" ");  
   }
-  //Junctions.pop_back();
   obstacleDetected = false;
   //delay(5);
   //follow_the_line();
 }
 
 void PreviousJunction(){
-  switch (route[a]){
+  switch (current_junction){
     case 0:
       Junction0();
       break;
@@ -310,7 +310,7 @@ void PreviousJunction(){
       stop();
       break;
     }
-}*/
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void drive(int current_direction_m1, int current_speed_m1, int current_direction_m2, int current_speed_m2, int direction_m1, int speed_m1, int direction_m2, int speed_m2){
@@ -540,7 +540,6 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
         desiredDestination = next;
         a = 0;
       }
-      
       a++;
 
       count = 0; 
@@ -811,7 +810,7 @@ void junction_1_directions(int mid_direction, int direction, int junctions_until
     }
 }
 
-/*
+
 void Junction0(){
   switch(current_junction){
     case 0:
@@ -924,7 +923,7 @@ void Junction2(){
 
 }
 void Junction3(){
-  switch (current_junction){
+  switch (route[a]){
       //coming from junction zero
       case 0:
 
@@ -1036,7 +1035,7 @@ void Junction5(){
   } 
 }
 
-*/
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Dijkstra's Algorithm - Returns the path 
 std::vector<int> dijkstra(int startNode, int destinationNode) {
