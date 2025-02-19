@@ -500,7 +500,6 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
       }
     }
     if (obstacle_count == 3){
-      obstacle_count = 0;
        delay(5);
        stop();
        delay(200);
@@ -528,6 +527,7 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
        turn180_function();
        delay(5);
   }
+    obstacle_count = 0;
   }
 
     //if mobot has not turned already, mobot will turn when mobot has passed a certain amount of junctions
