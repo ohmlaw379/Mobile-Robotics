@@ -133,7 +133,7 @@ void follow_the_line();
 void stop();
 
 void obstacle_you_are_in_my_way(int pass);
-void playmusic();
+//void playmusic();
 
 void parking(); 
 void drive_to_junction(int mid_direction, int direction, int junctions_until_turn, int direction_of_turn, int no_junctions_pass);
@@ -161,7 +161,7 @@ int getNextPosition(int currentPosition);
 
 //ESP NOW function declarations
 void initEspNow();
-void tryNextChannel(
+void tryNextChannel();
 void onDataSent(const uint8_t* mac_addr, esp_now_send_status_t status);
 void send_Message();
 //reroute algorithm declarations
@@ -259,6 +259,8 @@ void loop() {
     stop();
     delay(20);
     int finish = getNextPosition(5);
+    current_junction = 5;
+    send_Message();
   }
 }
 
@@ -566,8 +568,8 @@ void drive_to_junction(int mid_direction, int direction, int junctions_until_tur
               }
 
               if (current_junction == desired_destination){
-                  sendMessage();
-                  playmusic();
+                  send_Message();
+                  //playmusic();
                   next = getNextPosition(next);
                   if(next!= -2){
                     desired_destination = next;
