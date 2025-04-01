@@ -427,13 +427,7 @@ std::vector<int> dijkstra(int startNode, int destinationNode) {
     for (int v = destinationNode; v != -1; v = parent[v]) {
         path.push_back(v);
     }
-    Serial.print("route: ");
     reverse(path.begin(), path.end());
-    for(int j: path){
-      Serial.print(" ");
-      Serial.print(j);
-    }
-    Serial.println("");
     return path;
 }
 
